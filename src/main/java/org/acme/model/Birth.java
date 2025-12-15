@@ -8,16 +8,17 @@ public class Birth {
     // 💡 フィールドはpublicにしておくと、Quarkusが自動でJSONにシリアライズできます
 
     @NotBlank(message = "year is required")
-    public String year;
+    private String year;
 
     @NotBlank(message = "month is required")
-    public String month;
+    private String month;
 
     @NotBlank(message = "day is required")
-    public String day;
+    private String day;
 
+    @NotBlank(message = "gender is required")
     @Pattern(regexp = "male|female", message = "gender must be 'male' or 'female'")
-    public String gender;
+    private String gender;
     
 
     // デフォルトコンストラクタは必須ではありませんが、良い慣習です
@@ -29,4 +30,38 @@ public class Birth {
         this.day = day;
         this.gender = gender;
     }
+
+    public String getYear() {
+        return year;
+    }
+
+    public void setYear(String year) {
+        this.year = year;
+    }
+
+    public String getMonth() {
+        return month;
+    }
+
+    public void setMonth(String month) {
+        this.month = month;
+    }
+
+    public String getDay() {
+        return day;
+    }
+
+    public void setDay(String day) {
+        this.day = day;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    
 }
