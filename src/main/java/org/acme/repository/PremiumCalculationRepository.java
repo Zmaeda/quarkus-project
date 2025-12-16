@@ -1,40 +1,53 @@
 package org.acme.repository;
-import jakarta.enterprise.context.ApplicationScoped; // 💡 この行を追加
+
+import org.acme.model.Premium; // 💡 作成したPanache Entityをインポート
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-public class PremiumCalculationRepository{
+public class PremiumCalculationRepository {
 
-private static final int[][] PREMIUM_TABLE = {
-        // 年齢層:  男性(0) | 女性(1)
-        /* 20代 */ { 8000,   6500 },
-        /* 30代 */ { 12000,  10000 },
-        /* 40代 */ { 18000,  15000 },
-        /* 50代 */ { 25000,  21000 },
-        /* 60代 */ { 35000,  30000 }
-    };
+    private static final String GENDER_MALE = "male";
+    private static final String GENDER_FEMALE = "female";
+    private static final String DB_CODE_MALE = "M";
+    private static final String DB_CODE_FEMALE = "F";
 
+    /**
+     * 年齢と性別に基づき、PostgreSQLの premiums テーブルから保険料を取得します。
+     *
+     * @param age 計算された年齢
+     * @param gender リクエストされた性別 ("male" または "female")
+     * @return 保険料額
+     */
     public int getPremium(int age, String gender) {
-        
-        // 1. 年齢層のインデックス計算 (Row Index)
-        // 例: 35歳の場合 -> (35 / 10) - 2 = 3 - 2 = 1 (30代のインデックス)
-        int ageIndex = (age / 10) - 2; 
 
-        // 20歳未満、または69歳超は範囲外としてエラー処理
-        if (ageIndex < 0 || ageIndex >= PREMIUM_TABLE.length) {
-            throw new IllegalArgumentException("指定された年齢 " + age + " は保険料表の範囲外です (20-69歳)。");
-        }
-
-        // 2. 性別のインデックス計算 (Column Index)
-        int genderIndex;
-        if ("male".equalsIgnoreCase(gender)) {
-            genderIndex = 0; // 男性は0列目
-        } else if ("female".equalsIgnoreCase(gender)) {
-            genderIndex = 1; // 女性は1列目
+        //  性別をDB格納値 ('M'/'F') に変換
+        String dbGenderCode;
+        if (GENDER_MALE.equalsIgnoreCase(gender)) {
+            dbGenderCode = DB_CODE_MALE;
+        } else if (GENDER_FEMALE.equalsIgnoreCase(gender)) {
+            dbGenderCode = DB_CODE_FEMALE;
         } else {
-            throw new IllegalArgumentException("無効な性別指定です: " + gender + " (許容値: male, female)");
+            throw new IllegalArgumentException("InvalidGenderValue: The specified gender value '" + gender + "' is invalid. Accepted values are 'male' or 'female'.");
         }
 
-        // 3. 保険料の取得
-        return PREMIUM_TABLE[ageIndex][genderIndex];
+        // DBからデータを検索 (Panache Query)
+        // ユーザーの年齢以下の最大 age_group_min を持つレコードを探す
+        // 例: 35歳の場合、age_group_min <= 35 かつ gender = 'M' のレコードを age_group_min の降順でソート (30, 20...)
+        // 最初に見つかったレコード (age_group_min=30) を取得する
+        Premium premiumEntity = Premium.find(
+                "ageGroupMin <= ?1 AND gender = ?2 ORDER BY ageGroupMin DESC",
+                age,
+                dbGenderCode
+        ).firstResult();
+
+        // 4. 結果のチェック
+        if (premiumEntity == null) {
+            // DBにデータがない場合のフォールバック（通常は発生しない）
+            throw new IllegalArgumentException("PremiumNotFound: No matching premium rate found for the given criteria (Age: " + age + ", Gender: " + gender + ").");
+        }
+
+        // 5. 保険料額を返却
+        return premiumEntity.premiumAmount;
     }
 }

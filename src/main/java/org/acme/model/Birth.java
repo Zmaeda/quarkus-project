@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Pattern;
 
 // JSONを扱うためにJava Beanの形式にする
 public class Birth {
-    // 💡 フィールドはpublicにしておくと、Quarkusが自動でJSONにシリアライズできます
 
     @NotBlank(message = "year is required")
     private String year;
@@ -21,7 +20,7 @@ public class Birth {
     private String gender;
     
 
-    // デフォルトコンストラクタは必須ではありませんが、良い慣習です
+    
     public Birth() {}
     
     public Birth(String year,String month,String day,String gender) {

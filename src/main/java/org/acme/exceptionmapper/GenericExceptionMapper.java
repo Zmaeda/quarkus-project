@@ -3,6 +3,7 @@ package org.acme.exceptionmapper;
 import java.util.List; // 💡 JSON構文エラーの基底クラス
 
 import org.acme.model.CalculateResponse; // JSONパース/マッピングエラー
+import org.jboss.logging.Logger;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -15,20 +16,20 @@ import jakarta.ws.rs.ext.Provider;
 @Provider
 public class GenericExceptionMapper implements ExceptionMapper<Exception> {
 
+    private static final Logger LOG = Logger.getLogger(GenericExceptionMapper.class);
+    
     @Override
-    @SuppressWarnings("CallToPrintStackTrace")
     public Response toResponse(Exception exception) {
 
         // ログ出力（開発者向けの詳細なスタックトレースをコンソールに出力）
-        System.err.println("--- 🚨 汎用エラー捕捉 🚨 ---");
-        exception.printStackTrace();
+        LOG.error("--- 🚨 汎用エラー捕捉 🚨 ---", exception);
 
         // --- 1. JSONパースエラーの特定 (400 Bad Request) ---
         if (isJsonParseException(exception)) {
             
             // 開発者向けの詳細情報として、エラーの種類をerrorsリストに格納
             List<String> errorDetails = List.of(
-                    "Request Format Error: JSON parse/deserialization failed. Root Cause: " + exception.getCause().getClass().getSimpleName()
+                   exception.getCause().getClass().getSimpleName()+ " : Request Format Error: JSON parse/deserialization failed." 
             );
 
             CalculateResponse errorResponse = new CalculateResponse(errorDetails);
@@ -60,18 +61,6 @@ public class GenericExceptionMapper implements ExceptionMapper<Exception> {
                 .build();
     }
 
-    // Jacksonのエラーを安全に特定するためのヘルパーメソッド
-    // private boolean isJsonParseException(Exception e) {
-    //     // Jacksonのエラーは通常、WebApplicationExceptionなどにラップされている
-    //     Throwable rootCause = e;
-    //     while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
-    //         if (rootCause instanceof JsonParseException || rootCause instanceof JsonMappingException) {
-    //             return true;
-    //         }
-    //         rootCause = rootCause.getCause();
-    //     }
-    //     return false;
-    // }
     // 現在のrootCause自体が、json Exceptionの可能性を考慮する
     private boolean isJsonParseException(Exception e) {
         Throwable current = e;

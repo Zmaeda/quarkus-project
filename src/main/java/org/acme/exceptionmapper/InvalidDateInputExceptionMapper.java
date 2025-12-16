@@ -18,7 +18,7 @@ public class InvalidDateInputExceptionMapper implements ExceptionMapper<InvalidD
         
         // 開発者向けの詳細情報として、エラーの種類とメッセージをerrorsリストに格納
        List<String> errorDetails = List.of(
-            exception.getMessage() 
+            exception.getErrorType()+" : "+exception.getMessage() 
         );
 
         // CalculateResponse(List<String> errors) は status=400 を設定

@@ -10,12 +10,11 @@ import org.acme.model.Birth; // 💡 新しい例外をimport
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped // 💡 CDI Beanとして注入可能にする
-public class CulcValidation {
+public class CalcValidation {
 
     /**
      * BirthリクエストからLocalDateをパースし、有効性をチェックする。 無効な場合は InvalidDateInputException
      * をスローする。
-     *
      * @param request Birth DTO
      * @return 計算された年齢
      */
@@ -27,7 +26,7 @@ public class CulcValidation {
                     Integer.parseInt(request.getDay())
             );
 
-            // 💡 1. 将来の日付チェック
+            // 将来の日付チェック
             if (birthday.isAfter(LocalDate.now())) {
                 throw new IllegalArgumentException("Birthday cannot be a future date.");
             }
@@ -44,7 +43,7 @@ public class CulcValidation {
             throw new InvalidDateInputException(message, e.getClass().getSimpleName(), e);
 
         } catch (IllegalArgumentException e) {
-            // 💡 2. 未来の日付チェックでスローされた例外を捕捉
+            // 未来の日付チェックでスローされた例外を捕捉
             String message = e.getMessage();
             throw new InvalidDateInputException(message, e.getClass().getSimpleName(), e);
         }

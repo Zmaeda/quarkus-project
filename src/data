@@ -1,0 +1,50 @@
+CREATE TABLE premiums (
+    -- 主キー：データの識別子
+    id SERIAL PRIMARY KEY,
+    
+    -- 年齢層の識別子 (例: 20, 30, 40)
+    age_group_min INTEGER NOT NULL,
+    
+    -- 性別の識別子 (M: 男性, F: 女性)
+    gender CHAR(1) NOT NULL,
+    
+    -- 保険料額
+    premium_amount INTEGER NOT NULL,
+    
+    -- 複合ユニークキー (同じ年齢層・性別の組み合わせは1つだけ)
+    UNIQUE (age_group_min, gender)
+);
+
+INSERT INTO premiums (age_group_min, gender, premium_amount) VALUES
+-- 20代
+(20, 'M', 8000),   -- 男性
+(20, 'F', 6500),   -- 女性
+
+-- 30代
+(30, 'M', 12000),
+(30, 'F', 10000),
+
+-- 40代
+(40, 'M', 18000),
+(40, 'F', 15000),
+
+-- 50代
+(50, 'M', 25000),
+(50, 'F', 21000),
+
+-- 60代
+(60, 'M', 35000),
+(60, 'F', 30000);
+
+id | age_group_min | gender | premium_amount 
+----+---------------+--------+----------------
+  1 |            20 | M      |           8000
+  2 |            20 | F      |           6500
+  3 |            30 | M      |          12000
+  4 |            30 | F      |          10000
+  5 |            40 | M      |          18000
+  6 |            40 | F      |          15000
+  7 |            50 | M      |          25000
+  8 |            50 | F      |          21000
+  9 |            60 | M      |          35000
+ 10 |            60 | F      |          30000
