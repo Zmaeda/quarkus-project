@@ -31,6 +31,12 @@ public class PremiumCalculationRepository {
             throw new IllegalArgumentException("InvalidGenderValue: The specified gender value '" + gender + "' is invalid. Accepted values are 'male' or 'female'.");
         }
 
+        //【追記】
+        // SQL文補完論理チェック
+        if (age >= 70) {
+            throw new IllegalArgumentException("PremiumNotFound: No matching premium rate found for the given criteria (Age: " + age + ", Gender: " + gender + ").");
+        }
+
         // DBからデータを検索 (Panache Query)
         // ユーザーの年齢以下の最大 age_group_min を持つレコードを探す
         // 例: 35歳の場合、age_group_min <= 35 かつ gender = 'M' のレコードを age_group_min の降順でソート (30, 20...)
